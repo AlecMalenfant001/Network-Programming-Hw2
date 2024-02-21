@@ -1,4 +1,17 @@
-10000010 (2 characters)
->K
+01011100
+Sending int = -1268979043 (0xb45cea9d)
+ea 5c b4 9d
+Sending int = 939936611 (0x38064b63)
+4b 06 38 63
+Sending double = -96237997.817108060000 (0xc196f1e6b744b7fa)
+fa  b7  44  b7  e6  f1  96  c1  
+Sending double = 1955348154.286218600000 (0x41dd230fae925168)
+68  51  92  ae  0f  23  dd  41  
+Sending double = -1363577597.790601000000 (0xc1d451a2bf729935)
+35  99  72  bf  a2  51  d4  c1  
+Sending int = -1065173716 (0xc082bd2c)
+bd 82 c0 2c
+Sending double = -1172546915.999522400000 (0xc1d178e958fff82d)
+2d  f8  ff  58  e9  78  d1  c1  
 
 10000000
