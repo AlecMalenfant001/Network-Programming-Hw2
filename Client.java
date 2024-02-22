@@ -16,11 +16,19 @@ class Client {
       // constantly check for end of file
       // if eof comes before you expect, print an error and exit
 
+      // TODO :
+      /*
+       * 1) Check for unexpected End of files
+       * 2) Make it loop until it reaches the end of file so that the client can
+       * recieve multiple messages
+       * 3) Test, Test, Test
+       * 4) Javadocs
+       */
+
       // Get the head
       byte head;
       try {
          head = (byte) in.read();
-         System.out.println(isNumeric(head)); // remove this later
          // TODO : Check for end of file
       } catch (IOException e) {
          System.out.println(e);
@@ -28,47 +36,67 @@ class Client {
          System.exit(1);
       }
 
-      // printDouble(in);
+      // decide if the input is numeric or
+      int charOrNumeric = (head & 0xff) >> 7; // get most significant bit
+      if (charOrNumeric == 0) {
+         numericLoop(in, head);
+      } else {
+         printChars(in, head);
+      }
 
-      // printIntOrDouble(in, head);
+      // printInt(in);
 
       // int byteCounter = 0;
       // System.out.printf("\nRead %d bytes from standard input.\n", byteCounter);
    }
 
-   private static boolean isNumeric(byte head) {
-      // decide if the input is numeric or
-      int charOrNumeric = (head & 0xff) >> 7;
-      if (charOrNumeric == 0) {
-         System.out.println("Numeric");
-         return true;
-      } else {
-         System.out.println("Character");
-         return false;
-      }
-   }
+   private static void printChars(BufferedInputStream in, byte head) {
+      System.out.println("Character");
 
-   private static void printIntOrDouble(BufferedInputStream in, byte head) {
-      // read the message header for and print out if we're expecting an int or a
-      // double
-      // 00111001 = Most Significant -> Least significant
-      // most significant bit = 0 = numeric
-      // 0 = int
-      // 1 = double
+      int numChars = (head & 0x7f); // get the last 7 bits of the head
+      System.out.println("numChars: " + numChars);
+      try {
+         for (int i = 0; i < numChars; i++) {
+            char inputCharacter = (char) in.read();
+            System.out.print(inputCharacter);
+         }
+         // TODO : Check for eof()
 
-      int lsb = head & 1;
-      for (int i = 8; i > 0; i--) {
-         byte intOrDouble = (byte) (head & 1);
-         System.out.println("Bit #" + i + " = " + intOrDouble);
-         head = (byte) (head >> 1);
+      } catch (IOException e) {
+         System.out.println("\nUnexpected end of file while reading charcater : \n" + e);
+         e.printStackTrace();
+
       }
-      // System.out.println("Least Significant bit from first byte: " + lsb + "\n"
-      // + "Most Significant bit from fist byte: " + msb);
 
       return;
    }
 
-   static void printInt(BufferedInputStream in) {
+   private static void numericLoop(BufferedInputStream in, byte head) {
+      // 00111001 = Most Significant -> Least significant
+      // most significant bit = 0 = numeric
+      // 0 = int
+      // 1 = double
+      // Loop through the next 7 numbers from the input stream
+
+      // check the bit
+      int lsb = head & 1;
+      for (int i = 8; i > 1; i--) {
+         byte intOrDouble = (byte) (head & 1);
+         System.out.println("\nBit #" + i + " = " + intOrDouble);
+
+         // check if int or double
+         if ((int) intOrDouble == 0) {
+            printInt(in);
+         } else {
+            printDouble(in);
+         }
+
+         head = (byte) (head >> 1);
+      }
+
+   }
+
+   private static void printInt(BufferedInputStream in) {
       // created buffer
       ByteBuffer intByteBuffer = ByteBuffer.allocate(Integer.BYTES);
       try {
@@ -77,9 +105,10 @@ class Client {
          intByteBuffer.put(1, (byte) in.read());
          intByteBuffer.put(0, (byte) in.read());
          intByteBuffer.put(3, (byte) in.read());
+         // TODO: look for eof char
 
          // convert to int and print result
-         System.out.println("intByteBuffer: " + intByteBuffer.getInt() + "\n");
+         System.out.println("intByteBuffer: " + intByteBuffer.getInt());
 
       } catch (IOException e) {
          System.out.println("Unexpected error whilte reading bytes into intByteBuffer:\n" + e);
@@ -87,7 +116,7 @@ class Client {
       }
    }
 
-   static void printDouble(BufferedInputStream in) {
+   private static void printDouble(BufferedInputStream in) {
       // Read Double
       // create bytebuffer
       ByteBuffer doubleByteBuffer = ByteBuffer.allocate(Double.BYTES);
@@ -95,9 +124,10 @@ class Client {
       try {
          for (int i = 7; i >= 0; i--) {
             doubleByteBuffer.put(i, (byte) in.read());
+            // TODO: look for eof char
          }
          // convert to double and print result
-         System.out.printf("\ndoubleByteBuffer : %.12f \n", doubleByteBuffer.getDouble());
+         System.out.printf("doubleByteBuffer : %.12f \n", doubleByteBuffer.getDouble());
 
       } catch (IOException e) {
          System.out.println("Unexpected error whilte reading bytes into doubleByteBuffer:\n" + e);
